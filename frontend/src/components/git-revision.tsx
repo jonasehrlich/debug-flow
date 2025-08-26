@@ -83,13 +83,12 @@ export const GitRevision = ({ revision, nodeId }: GitRevisionProps) => {
       );
     }
 
-    const label = pinnedState === PinnedState.PinnedA ? "A" : "B";
     return (
       <ActionButton
         tooltipContent="Unpin revision"
         onClick={handleUnpinClick}
         className="size-6 text-sm font-bold"
-        icon={label}
+        icon={pinnedState}
       ></ActionButton>
     );
   };

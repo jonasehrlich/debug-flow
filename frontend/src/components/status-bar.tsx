@@ -7,7 +7,11 @@ import { useEventStream } from "@/hooks/use-event-stream";
 import { cn } from "@/lib/utils";
 import { useStore, useUiStore } from "@/store";
 import type { RepositoryStatus } from "@/types/api-types";
-import { formatGitRevision, type PinnedNodeData } from "@/types/nodes";
+import {
+  formatGitRevision,
+  PinnedState,
+  type PinnedNodeData,
+} from "@/types/nodes";
 import type { AppState, UiState } from "@/types/state";
 import {
   FileDiff,
@@ -203,8 +207,7 @@ const selector = (state: AppState) => ({
   gitStatus: state.gitStatus,
   prevGitStatus: state.prevGitStatus,
   restoreGitStatus: state.restoreGitStatus,
-  hasRevisions: state.pinnedNodes[0] !== null,
-  displayPanel: state.pinnedNodes[0] !== null || state.gitStatus != null,
+  hasRevisions: state.pinnedNodes.some((value) => value !== null),
 });
 
 const FormattedGitRev = ({
@@ -237,13 +240,13 @@ export const PinnedNodesStatusBarItem = () => {
     return null;
   }
 
-  const [revA, revB] = pinnedNodes;
+  const [nodeA, nodeB] = pinnedNodes;
 
   return (
     <StatusBarItem>
-      <FormattedGitRev node={revA} letter="A" />
-      {revA && revB && <span className="text-muted-foreground">...</span>}
-      <FormattedGitRev node={revB} letter="B" />
+      <FormattedGitRev node={nodeA} letter={PinnedState.PinnedA} />
+      {nodeA && nodeB && <span className="text-muted-foreground">...</span>}
+      <FormattedGitRev node={nodeB} letter={PinnedState.PinnedB} />
       <Button
         variant="destructive"
         size="sm"

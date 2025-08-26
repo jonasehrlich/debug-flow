@@ -76,9 +76,9 @@ export type EditAppNodeData =
   | EditNodeData<"statusNode", StatusNodeData>;
 
 export enum PinnedState {
-  PinnedA = "PinnedA",
-  PinnedB = "PinnedB",
-  NotPinned = "NotPinned",
+  PinnedA = "a",
+  PinnedB = "b",
+  NotPinned = "",
 }
 
 export interface PinnedNodeData {
