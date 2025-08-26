@@ -19,6 +19,8 @@ const selector = (s: AppState) => ({
   checkoutGitRevision: s.checkoutGitRevision,
   clearPinnedNodes: s.clearPinnedNodes,
   pinnedNodes: s.pinnedNodes,
+  highlightPinnedNode: s.highlightPinnedNode,
+  clearHighlightedNode: s.clearHighlightedNode,
 });
 
 interface GitRevisionIconProps {
@@ -49,8 +51,14 @@ interface GitRevisionProps {
   nodeId: string;
 }
 export const GitRevision = ({ revision, nodeId }: GitRevisionProps) => {
-  const { addPinnedNode, checkoutGitRevision, clearPinnedNodes, pinnedNodes } =
-    useStore(useShallow(selector));
+  const {
+    addPinnedNode,
+    checkoutGitRevision,
+    clearPinnedNodes,
+    pinnedNodes,
+    highlightPinnedNode,
+    clearHighlightedNode,
+  } = useStore(useShallow(selector));
   const [pinnedState, setPinnedState] = React.useState<PinnedState>(
     PinnedState.NotPinned,
   );

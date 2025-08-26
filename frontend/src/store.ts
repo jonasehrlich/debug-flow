@@ -104,6 +104,7 @@ const initialState = {
   hasUnsavedChanges: false,
   dialogNodeData: null,
   pinnedNodes: [null, null] as [null, null],
+  highlightedNodeId: null as string | null,
   gitStatus: null,
   prevGitStatus: null,
 };
@@ -178,6 +179,12 @@ export const useStore = create<AppState>()(
         } else {
           set({ pinnedNodes: [null, null] });
         }
+      },
+      highlightPinnedNode(nodeId: string) {
+        set({ highlightedNodeId: nodeId });
+      },
+      clearHighlightedNode() {
+        set({ highlightedNodeId: null });
       },
       async checkoutGitRevision(rev: string) {
         try {
