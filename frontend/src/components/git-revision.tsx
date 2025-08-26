@@ -12,6 +12,7 @@ const selector = (s: AppState) => ({
   addPinnedNode: s.addPinnedNode,
   checkoutGitRevision: s.checkoutGitRevision,
   clearPinnedNodes: s.clearPinnedNodes,
+  pinnedNodes: s.pinnedNodes,
 });
 
 interface GitRevisionIconProps {
@@ -39,9 +40,8 @@ interface GitRevisionProps {
   nodeId: string;
 }
 export const GitRevision = ({ revision, nodeId }: GitRevisionProps) => {
-  const { addPinnedNode, checkoutGitRevision, clearPinnedNodes } = useStore(
-    useShallow(selector),
-  );
+  const { addPinnedNode, checkoutGitRevision, clearPinnedNodes, pinnedNodes } =
+    useStore(useShallow(selector));
   const [pinnedState, setPinnedState] = React.useState<PinnedState>(
     PinnedState.NotPinned,
   );
@@ -49,6 +49,19 @@ export const GitRevision = ({ revision, nodeId }: GitRevisionProps) => {
   const formattedRev = React.useMemo(() => {
     return formatGitRevision(revision);
   }, [revision]);
+
+  React.useEffect(() => {
+    const isNodePinnedInSlotA = pinnedNodes[0]?.id === nodeId;
+    const isNodePinnedInSlotB = pinnedNodes[1]?.id === nodeId;
+
+    if (isNodePinnedInSlotA) {
+      setPinnedState(PinnedState.PinnedA);
+    } else if (isNodePinnedInSlotB) {
+      setPinnedState(PinnedState.PinnedB);
+    } else {
+      setPinnedState(PinnedState.NotPinned);
+    }
+  }, [pinnedNodes, nodeId]);
 
   const handlePinClick = () => {
     const result = addPinnedNode({ id: nodeId, git: revision });
