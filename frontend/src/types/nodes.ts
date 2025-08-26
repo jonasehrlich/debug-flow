@@ -75,6 +75,12 @@ export type EditAppNodeData =
   | EditNodeData<"actionNode", ActionNodeData>
   | EditNodeData<"statusNode", StatusNodeData>;
 
+export enum PinnedState {
+  PinnedA = "PinnedA",
+  PinnedB = "PinnedB",
+  NotPinned = "NotPinned",
+}
+
 export interface PinnedNodeData {
   id: string;
   git: GitMetadata;

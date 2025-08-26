@@ -1,7 +1,7 @@
 import { isCommitMetadata, isTagMetadata, type GitMetadata } from "@/client";
 import { cn } from "@/lib/utils";
 import { useStore } from "@/store";
-import { formatGitRevision } from "@/types/nodes";
+import { formatGitRevision, PinnedState } from "@/types/nodes";
 import type { AppState } from "@/types/state";
 import {
   ArrowDownToLine,
@@ -17,6 +17,7 @@ import { ActionButton, CopyButton } from "./action-button";
 const selector = (s: AppState) => ({
   addPinnedNode: s.addPinnedNode,
   checkoutGitRevision: s.checkoutGitRevision,
+  clearPinnedNodes: s.clearPinnedNodes,
 });
 
 interface GitRevisionIconProps {
@@ -47,11 +48,51 @@ interface GitRevisionProps {
   nodeId: string;
 }
 export const GitRevision = ({ revision, nodeId }: GitRevisionProps) => {
-  const { addPinnedNode, checkoutGitRevision } = useStore(useShallow(selector));
+  const { addPinnedNode, checkoutGitRevision, clearPinnedNodes } = useStore(
+    useShallow(selector),
+  );
+  const [pinnedState, setPinnedState] = React.useState<PinnedState>(
+    PinnedState.NotPinned,
+  );
 
   const formattedRev = React.useMemo(() => {
     return formatGitRevision(revision);
   }, [revision]);
+
+  const handlePinClick = () => {
+    const result = addPinnedNode({ id: nodeId, git: revision });
+    setPinnedState(result);
+    return true;
+  };
+
+  const handleUnpinClick = () => {
+    clearPinnedNodes(pinnedState);
+    setPinnedState(PinnedState.NotPinned);
+    return true;
+  };
+
+  const renderPinButton = () => {
+    if (pinnedState === PinnedState.NotPinned) {
+      return (
+        <ActionButton
+          tooltipContent="Pin revision"
+          icon={<Pin />}
+          onClick={handlePinClick}
+          className="size-6"
+        />
+      );
+    }
+
+    const label = pinnedState === PinnedState.PinnedA ? "A" : "B";
+    return (
+      <ActionButton
+        tooltipContent="Unpin revision"
+        onClick={handleUnpinClick}
+        className="size-6 text-sm font-bold"
+        icon={label}
+      ></ActionButton>
+    );
+  };
 
   return (
     <div className={cn("text-muted-foreground flex flex-1 items-center")}>
@@ -59,15 +100,7 @@ export const GitRevision = ({ revision, nodeId }: GitRevisionProps) => {
       <span className="flex-1 truncate px-3 align-middle font-mono">
         {formattedRev}
       </span>
-      <ActionButton
-        tooltipContent="Pin revision"
-        icon={<Pin />}
-        onClick={() => {
-          addPinnedNode({ id: nodeId, git: revision });
-          return true;
-        }}
-        className="size-6"
-      />
+      {renderPinButton()}
       <CopyButton value={formattedRev} />
       <ActionButton
         tooltipContent="Checkout revision"

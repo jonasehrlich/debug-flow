@@ -23,6 +23,7 @@ import {
   getMatchingMetaData,
   isAppNode,
   isStatusNode,
+  PinnedState,
   type AppNode,
   type AppNodeType,
 } from "./types/nodes";
@@ -157,13 +158,26 @@ export const useStore = create<AppState>()(
         const pinnedNodes = get().pinnedNodes;
         if (pinnedNodes[0] === null) {
           pinnedNodes[0] = node;
+          set({ pinnedNodes: pinnedNodes });
+          return PinnedState.PinnedA;
         } else {
           pinnedNodes[1] = node;
+          set({ pinnedNodes: pinnedNodes });
+          return PinnedState.PinnedB;
         }
-        set({ pinnedNodes: pinnedNodes });
       },
-      clearPinnedNodes() {
-        set({ pinnedNodes: [null, null] });
+      clearPinnedNodes(state?: PinnedState) {
+        if (state === PinnedState.PinnedA) {
+          const pinnedNodes = get().pinnedNodes;
+          pinnedNodes[0] = null;
+          set({ pinnedNodes: pinnedNodes });
+        } else if (state === PinnedState.PinnedB) {
+          const pinnedNodes = get().pinnedNodes;
+          pinnedNodes[1] = null;
+          set({ pinnedNodes: pinnedNodes });
+        } else {
+          set({ pinnedNodes: [null, null] });
+        }
       },
       async checkoutGitRevision(rev: string) {
         try {
