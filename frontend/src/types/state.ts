@@ -62,6 +62,12 @@ export interface AppState {
     | null;
   /** Array of pinned nodes for a diff. The array can only contain two elements */
   pinnedNodes: [PinnedNodeData | null, PinnedNodeData | null];
+  /** ID of the currently highlighted node */
+  highlightedNodeId: string | null;
+  /** Highlight a pinned node by its ID */
+  highlightPinnedNode: (nodeId: string) => void;
+  /** Clear the currently highlighted node */
+  clearHighlightedNode: () => void;
   /**
    * Add a Git revision to the {@link pinnedNodes}
    * @description If two revisions are in the array already, the second one is replaced

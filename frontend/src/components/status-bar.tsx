@@ -208,33 +208,55 @@ const selector = (state: AppState) => ({
   prevGitStatus: state.prevGitStatus,
   restoreGitStatus: state.restoreGitStatus,
   hasRevisions: state.pinnedNodes.some((value) => value !== null),
+  highlightPinnedNode: state.highlightPinnedNode,
+  clearHighlightedNode: state.clearHighlightedNode,
 });
 
-const FormattedGitRev = ({
+const PinnedGitRev = ({
   node,
   letter,
+  highlightPinnedNode,
+  clearHighlightedNode,
 }: {
   node: PinnedNodeData | null;
   letter: string;
+  highlightPinnedNode: (nodeId: string) => void;
+  clearHighlightedNode: () => void;
 }) => {
   if (!node) return null;
 
+  const handleMouseEnter = () => {
+    highlightPinnedNode(node.id);
+  };
+
+  const handleMouseLeave = () => {
+    clearHighlightedNode();
+  };
+
   return (
-    <>
+    <div
+      className="flex items-center gap-1"
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+    >
       <div className="bg-primary text-primary-foreground flex h-4 w-4 items-center justify-center rounded-full text-xs font-medium select-none">
         {letter}
       </div>
       <span className="max-w-48 truncate font-mono text-sm select-none">
         {formatGitRevision(node.git)}
       </span>
-    </>
+    </div>
   );
 };
 
 export const PinnedNodesStatusBarItem = () => {
-  const { pinnedNodes, clearPinnedNodes, hasRevisions } = useStore(
-    useShallow(selector),
-  );
+  const {
+    pinnedNodes,
+    clearPinnedNodes,
+    hasRevisions,
+    highlightPinnedNode,
+    clearHighlightedNode,
+  } = useStore(useShallow(selector));
   const { setIsGitDialogOpen } = useUiStore(useShallow(uiSelector));
   if (!hasRevisions) {
     return null;
@@ -244,9 +266,19 @@ export const PinnedNodesStatusBarItem = () => {
 
   return (
     <StatusBarItem>
-      <FormattedGitRev node={nodeA} letter={PinnedState.PinnedA} />
+      <PinnedGitRev
+        node={nodeA}
+        letter={PinnedState.PinnedA}
+        highlightPinnedNode={highlightPinnedNode}
+        clearHighlightedNode={clearHighlightedNode}
+      />
       {nodeA && nodeB && <span className="text-muted-foreground">...</span>}
-      <FormattedGitRev node={nodeB} letter={PinnedState.PinnedB} />
+      <PinnedGitRev
+        node={nodeB}
+        letter={PinnedState.PinnedB}
+        highlightPinnedNode={highlightPinnedNode}
+        clearHighlightedNode={clearHighlightedNode}
+      />
       <Button
         variant="destructive"
         size="sm"
