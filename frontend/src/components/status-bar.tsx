@@ -207,7 +207,7 @@ const selector = (state: AppState) => ({
   gitStatus: state.gitStatus,
   prevGitStatus: state.prevGitStatus,
   restoreGitStatus: state.restoreGitStatus,
-  hasRevisions: state.pinnedNodes.some((value) => value !== null),
+  hasPinnedNodes: state.pinnedNodes.some((value) => value !== null),
   highlightPinnedNode: state.highlightPinnedNode,
   clearHighlightedNode: state.clearHighlightedNode,
 });
@@ -253,12 +253,12 @@ export const PinnedNodesStatusBarItem = () => {
   const {
     pinnedNodes,
     clearPinnedNodes,
-    hasRevisions,
+    hasPinnedNodes,
     highlightPinnedNode,
     clearHighlightedNode,
   } = useStore(useShallow(selector));
   const { setIsGitDialogOpen } = useUiStore(useShallow(uiSelector));
-  if (!hasRevisions) {
+  if (!hasPinnedNodes) {
     return null;
   }
 

@@ -156,26 +156,28 @@ export const useStore = create<AppState>()(
         set({ dialogNodeData: { type: "pending", data: nodeData } });
       },
       addPinnedNode(node) {
+        // We mustn't mutate the exisiting array so that zustand useShallow detects the change
         const pinnedNodes = get().pinnedNodes;
+        const cyclePinnedNodes = pinnedNodes.every((n) => n !== null);
+        if (cyclePinnedNodes) {
+          set({ pinnedNodes: [pinnedNodes[1], node] });
+          return PinnedState.PinnedB;
+        }
+
         if (pinnedNodes[0] === null) {
-          pinnedNodes[0] = node;
-          set({ pinnedNodes: pinnedNodes });
+          set({ pinnedNodes: [node, pinnedNodes[1]] });
           return PinnedState.PinnedA;
         } else {
-          pinnedNodes[1] = node;
-          set({ pinnedNodes: pinnedNodes });
+          set({ pinnedNodes: [pinnedNodes[0], node] });
           return PinnedState.PinnedB;
         }
       },
       clearPinnedNodes(state?: PinnedState) {
+        const pinnedNodes = get().pinnedNodes;
         if (state === PinnedState.PinnedA) {
-          const pinnedNodes = get().pinnedNodes;
-          pinnedNodes[0] = null;
-          set({ pinnedNodes: pinnedNodes });
+          set({ pinnedNodes: [null, pinnedNodes[1]] });
         } else if (state === PinnedState.PinnedB) {
-          const pinnedNodes = get().pinnedNodes;
-          pinnedNodes[1] = null;
-          set({ pinnedNodes: pinnedNodes });
+          set({ pinnedNodes: [pinnedNodes[0], null] });
         } else {
           set({ pinnedNodes: [null, null] });
         }
