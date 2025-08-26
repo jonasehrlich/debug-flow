@@ -20,11 +20,13 @@ import {
   FilePlus,
   GitBranch,
   GitCommitVertical,
+  RotateCcw,
   type LucideIcon,
 } from "lucide-react";
 import React from "react";
 import { useShallow } from "zustand/react/shallow";
 import { Button } from "./ui/button";
+import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 
 const StatusBarItem = ({
   className,
@@ -249,6 +251,37 @@ const PinnedGitRev = ({
   );
 };
 
+const RestoreGitStatusButton = () => {
+  const { prevGitStatus, restoreGitStatus } = useStore(useShallow(selector));
+
+  if (!prevGitStatus) {
+    return null;
+  }
+
+  const tooltipContent = `Restore to ${formatGitRevision(prevGitStatus.revision)}`;
+
+  return (
+    <StatusBarItem>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            variant="secondary"
+            size="sm"
+            className="h-6 px-2 text-xs"
+            onClick={() => {
+              restoreGitStatus();
+            }}
+          >
+            <RotateCcw size={12} className="mr-1" />
+            Restore
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>{tooltipContent}</TooltipContent>
+      </Tooltip>
+    </StatusBarItem>
+  );
+};
+
 export const PinnedNodesStatusBarItem = () => {
   const {
     pinnedNodes,
@@ -334,8 +367,9 @@ export const StatusBar = ({
       {...props}
     >
       <BranchStatusBarItem status={events["git-status"]} />
+      <RestoreGitStatusButton />
       <ChangesStatusBarItem status={events["git-status"]} />
-      {<PinnedNodesStatusBarItem />}
+      <PinnedNodesStatusBarItem />
     </div>
   );
 };

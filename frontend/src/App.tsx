@@ -17,7 +17,6 @@ import { AppMenubar } from "./components/app-menubar";
 import { CreateNodeDialog } from "./components/create-node-dialog";
 import { EditNodeDialog } from "./components/edit-node-dialog";
 import { GitDialog } from "./components/git-dialog";
-import { GitRevisionsPanel } from "./components/git-revisions-panel";
 import { HelpDialog, KeybindingsDialog } from "./components/help-dialog";
 import { ActionNode, StatusNode } from "./components/nodes";
 import { StatusBar } from "./components/status-bar";
@@ -228,7 +227,6 @@ export const App = () => {
         <EditNodeDialog />
         <CreateNodeDialog />
         <GitDialog />
-        <GitRevisionsPanel />
         <Panel position="bottom-left">
           <StatusBar />
         </Panel>
