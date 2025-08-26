@@ -13,6 +13,7 @@ import type {
   EditAppNodeData,
   PendingAppNodeData,
   PinnedNodeData,
+  PinnedState,
 } from "./nodes";
 
 export interface FlowIdAndName {
@@ -65,10 +66,14 @@ export interface AppState {
    * Add a Git revision to the {@link pinnedNodes}
    * @description If two revisions are in the array already, the second one is replaced
    * @param node: node to pin
+   * @returns The pinned state (PinnedA or PinnedB)
    */
-  addPinnedNode: (node: PinnedNodeData) => void;
-  /** Clear the Git revisions array */
-  clearPinnedNodes: () => void;
+  addPinnedNode: (node: PinnedNodeData) => PinnedState;
+  /**
+   * Clear the Git revisions array
+   * @param state - Optional pinned state to clear (PinnedA or PinnedB). If not provided, clears all pinned nodes
+   */
+  clearPinnedNodes: (state?: PinnedState) => void;
   /** The current Git status of the repository */
   gitStatus: GitStatus | null;
   /** The Git status of the repository before the checkout*/

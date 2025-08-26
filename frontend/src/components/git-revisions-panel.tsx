@@ -5,40 +5,25 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { useStore, useUiStore } from "@/store";
+import { useStore } from "@/store";
 import { formatGitRevision } from "@/types/nodes";
-import type { AppState, UiState } from "@/types/state";
+import type { AppState } from "@/types/state";
 import { Panel } from "@xyflow/react";
 import { RotateCcw } from "lucide-react";
 import { useShallow } from "zustand/react/shallow";
 import { GitStatusCard } from "./git-status-card";
 
 const selector = (state: AppState) => ({
-  pinnedNodes: state.pinnedNodes,
-  clearPinnedNodes: state.clearPinnedNodes,
   gitStatus: state.gitStatus,
   prevGitStatus: state.prevGitStatus,
   restoreGitStatus: state.restoreGitStatus,
-  hasRevisions: state.pinnedNodes[0] !== null,
   displayPanel: state.pinnedNodes[0] !== null || state.gitStatus != null,
 });
 
-const uiSelector = (s: UiState) => ({
-  setIsGitDialogOpen: s.setIsGitDialogOpen,
-});
-
 export const GitRevisionsPanel = () => {
-  const {
-    pinnedNodes,
-    clearPinnedNodes,
-    gitStatus,
-    prevGitStatus,
-    restoreGitStatus,
-    hasRevisions,
-    displayPanel,
-  } = useStore(useShallow(selector));
-
-  const { setIsGitDialogOpen } = useUiStore(useShallow(uiSelector));
+  const { gitStatus, prevGitStatus, restoreGitStatus, displayPanel } = useStore(
+    useShallow(selector),
+  );
 
   const prevRevision = prevGitStatus
     ? formatGitRevision(prevGitStatus.revision)
