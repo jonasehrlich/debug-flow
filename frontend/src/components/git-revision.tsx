@@ -1,9 +1,15 @@
-import { isTagMetadata, type GitMetadata } from "@/client";
+import { isCommitMetadata, isTagMetadata, type GitMetadata } from "@/client";
 import { cn } from "@/lib/utils";
 import { useStore } from "@/store";
 import { formatGitRevision } from "@/types/nodes";
 import type { AppState } from "@/types/state";
-import { ArrowDownToLine, GitBranch, Pin, Tag } from "lucide-react";
+import {
+  ArrowDownToLine,
+  GitBranch,
+  GitCommitVertical,
+  Pin,
+  Tag,
+} from "lucide-react";
 import React from "react";
 import { useShallow } from "zustand/react/shallow";
 import { ActionButton, CopyButton } from "./action-button";
@@ -23,7 +29,10 @@ export const GitRevisionIcon = ({
 }: GitRevisionIconProps): React.JSX.Element => {
   if (isTagMetadata(revision)) {
     return <Tag size={size} />;
+  } else if (isCommitMetadata(revision)) {
+    return <GitCommitVertical size={size} />;
   }
+
   return <GitBranch size={size} />;
 };
 
