@@ -218,10 +218,10 @@ const FormattedGitRev = ({
 
   return (
     <>
-      <div className="bg-primary text-primary-foreground flex h-4 w-4 items-center justify-center rounded-full text-xs font-medium">
+      <div className="bg-primary text-primary-foreground flex h-4 w-4 items-center justify-center rounded-full text-xs font-medium select-none">
         {letter}
       </div>
-      <span className="max-w-48 truncate font-mono text-sm">
+      <span className="max-w-48 truncate font-mono text-sm select-none">
         {formatGitRevision(node.git)}
       </span>
     </>
@@ -245,7 +245,6 @@ export const PinnedNodesStatusBarItem = () => {
       {revA && revB && <span className="text-muted-foreground">...</span>}
       <FormattedGitRev node={revB} letter="B" />
       <Button
-        disabled={pinnedNodes[1] === null}
         variant="destructive"
         size="sm"
         className="h-6 px-2 text-xs"
