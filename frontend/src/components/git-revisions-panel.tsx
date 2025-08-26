@@ -1,12 +1,5 @@
 import { Button } from "@/components/ui/button";
 import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
@@ -16,9 +9,8 @@ import { useStore, useUiStore } from "@/store";
 import { formatGitRevision } from "@/types/nodes";
 import type { AppState, UiState } from "@/types/state";
 import { Panel } from "@xyflow/react";
-import { GitGraph, RotateCcw, X } from "lucide-react";
+import { RotateCcw } from "lucide-react";
 import { useShallow } from "zustand/react/shallow";
-import { CopyButton } from "./action-button";
 import { GitStatusCard } from "./git-status-card";
 
 const selector = (state: AppState) => ({
@@ -83,47 +75,6 @@ export const GitRevisionsPanel = () => {
                 </Tooltip>
               )}
             />
-          )}
-          {hasRevisions && (
-            <Card className="w-80 gap-4">
-              <CardHeader>
-                <CardTitle>Git Revisions</CardTitle>
-              </CardHeader>
-              <CardContent className="divide-y text-sm">
-                {pinnedNodes.map(
-                  (node, index) =>
-                    node && (
-                      <div key={index} className="flex justify-between py-2">
-                        <span className="block max-w-full overflow-hidden font-mono text-ellipsis whitespace-nowrap">
-                          {formatGitRevision(node.git)}
-                        </span>
-                        <CopyButton value={node.git.rev} tooltip={false} />
-                      </div>
-                    ),
-                )}
-              </CardContent>
-              <CardFooter className="flex gap-2">
-                <Button
-                  onClick={() => {
-                    clearPinnedNodes();
-                  }}
-                  variant="destructive"
-                >
-                  <X /> Clear
-                </Button>
-                {pinnedNodes[1] !== null && (
-                  <Button
-                    onClick={() => {
-                      setIsGitDialogOpen(true);
-                    }}
-                    variant="outline"
-                  >
-                    <GitGraph />
-                    Show Graph
-                  </Button>
-                )}
-              </CardFooter>
-            </Card>
           )}
         </Panel>
       </TooltipProvider>

@@ -7,7 +7,7 @@ import { useEventStream } from "@/hooks/use-event-stream";
 import { cn } from "@/lib/utils";
 import { useStore, useUiStore } from "@/store";
 import type { RepositoryStatus } from "@/types/api-types";
-import { formatGitRevision } from "@/types/nodes";
+import { formatGitRevision, type PinnedNodeData } from "@/types/nodes";
 import type { AppState, UiState } from "@/types/state";
 import {
   FileDiff,
@@ -16,16 +16,11 @@ import {
   FilePlus,
   GitBranch,
   GitCommitVertical,
-  GitGraph,
-  Pin,
-  X,
   type LucideIcon,
 } from "lucide-react";
 import React from "react";
 import { useShallow } from "zustand/react/shallow";
 import { Button } from "./ui/button";
-import { Input } from "./ui/input";
-import { Label } from "./ui/label";
 
 const StatusBarItem = ({
   className,
@@ -212,75 +207,65 @@ const selector = (state: AppState) => ({
   displayPanel: state.pinnedNodes[0] !== null || state.gitStatus != null,
 });
 
-export const PinnedRevisionsStatusBarItem = () => {
+const FormattedGitRev = ({
+  node,
+  letter,
+}: {
+  node: PinnedNodeData | null;
+  letter: string;
+}) => {
+  if (!node) return null;
+
+  return (
+    <>
+      <div className="bg-primary text-primary-foreground flex h-4 w-4 items-center justify-center rounded-full text-xs font-medium">
+        {letter}
+      </div>
+      <span className="max-w-48 truncate font-mono text-sm">
+        {formatGitRevision(node.git)}
+      </span>
+    </>
+  );
+};
+
+export const PinnedNodesStatusBarItem = () => {
   const { pinnedNodes, clearPinnedNodes, hasRevisions } = useStore(
     useShallow(selector),
   );
   const { setIsGitDialogOpen } = useUiStore(useShallow(uiSelector));
+  if (!hasRevisions) {
+    return null;
+  }
+
+  const [revA, revB] = pinnedNodes;
 
   return (
     <StatusBarItem>
-      <Popover>
-        <PopoverTrigger>
-          <>
-            <Pin />
-            {hasRevisions && (
-              <>
-                {pinnedNodes.map(
-                  (node, index) =>
-                    node && (
-                      <div key={index} className="flex items-center py-2">
-                        {formatGitRevision(node.git)}
-                        {/* <CopyButton value={node.git.rev} tooltip={false}  /> */}
-                      </div>
-                    ),
-                )}
-              </>
-            )}
-          </>
-        </PopoverTrigger>
-        <PopoverContent>
-          <div className="grid gap-4">
-            <div className="space-y-2">
-              <h4 className="leading-none font-medium">Pinned Git Revisions</h4>
-            </div>
-            <div className="grid gap-2">
-              <div className="grid grid-cols-3 items-center gap-4">
-                <Label htmlFor="base">Base</Label>
-                <Input
-                  id="width"
-                  defaultValue="100%"
-                  className="col-span-2 h-8"
-                />
-              </div>
-            </div>
-          </div>
-        </PopoverContent>
-      </Popover>
-
-      {hasRevisions && (
-        <>
-          <Button
-            disabled={pinnedNodes[1] === null}
-            variant="destructive"
-            className="has-[>svg]:px-1"
-            onClick={() => {
-              clearPinnedNodes();
-            }}
-          >
-            <X />
-          </Button>
-          <Button
-            disabled={pinnedNodes[1] === null}
-            variant="secondary"
-            onClick={() => {
-              setIsGitDialogOpen(true);
-            }}
-          >
-            <GitGraph />
-          </Button>
-        </>
-      )}
+      <FormattedGitRev node={revA} letter="A" />
+      {revA && revB && <span className="text-muted-foreground">...</span>}
+      <FormattedGitRev node={revB} letter="B" />
+      <Button
+        disabled={pinnedNodes[1] === null}
+        variant="destructive"
+        size="sm"
+        className="h-6 px-2 text-xs"
+        onClick={() => {
+          clearPinnedNodes();
+        }}
+      >
+        Clear
+      </Button>
+      <Button
+        disabled={pinnedNodes[1] === null}
+        variant="secondary"
+        size="sm"
+        className="h-6 px-2 text-xs"
+        onClick={() => {
+          setIsGitDialogOpen(true);
+        }}
+      >
+        Git Graph
+      </Button>
     </StatusBarItem>
   );
 };
@@ -316,7 +301,7 @@ export const StatusBar = ({
     >
       <BranchStatusBarItem status={events["git-status"]} />
       <ChangesStatusBarItem status={events["git-status"]} />
-      {/* <PinnedRevisionsStatusBarItem /> */}
+      {<PinnedNodesStatusBarItem />}
     </div>
   );
 };
