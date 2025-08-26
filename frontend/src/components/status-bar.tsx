@@ -203,18 +203,19 @@ const uiSelector = (s: UiState) => ({
 });
 
 const selector = (state: AppState) => ({
-  pinnedGitRevisions: state.pinnedGitRevisions,
-  clearPinnedGitRevisions: state.clearPinnedGitRevisions,
+  pinnedNodes: state.pinnedNodes,
+  clearPinnedNodes: state.clearPinnedNodes,
   gitStatus: state.gitStatus,
   prevGitStatus: state.prevGitStatus,
   restoreGitStatus: state.restoreGitStatus,
-  hasRevisions: state.pinnedGitRevisions[0] !== null,
-  displayPanel: state.pinnedGitRevisions[0] !== null || state.gitStatus != null,
+  hasRevisions: state.pinnedNodes[0] !== null,
+  displayPanel: state.pinnedNodes[0] !== null || state.gitStatus != null,
 });
 
 export const PinnedRevisionsStatusBarItem = () => {
-  const { pinnedGitRevisions, clearPinnedGitRevisions, hasRevisions } =
-    useStore(useShallow(selector));
+  const { pinnedNodes, clearPinnedNodes, hasRevisions } = useStore(
+    useShallow(selector),
+  );
   const { setIsGitDialogOpen } = useUiStore(useShallow(uiSelector));
 
   return (
@@ -225,12 +226,12 @@ export const PinnedRevisionsStatusBarItem = () => {
             <Pin />
             {hasRevisions && (
               <>
-                {pinnedGitRevisions.map(
-                  (rev, index) =>
-                    rev && (
+                {pinnedNodes.map(
+                  (node, index) =>
+                    node && (
                       <div key={index} className="flex items-center py-2">
-                        {formatGitRevision(rev)}
-                        {/* <CopyButton value={rev.rev} tooltip={false}  /> */}
+                        {formatGitRevision(node.git)}
+                        {/* <CopyButton value={node.git.rev} tooltip={false}  /> */}
                       </div>
                     ),
                 )}
@@ -260,17 +261,17 @@ export const PinnedRevisionsStatusBarItem = () => {
       {hasRevisions && (
         <>
           <Button
-            disabled={pinnedGitRevisions[1] === null}
+            disabled={pinnedNodes[1] === null}
             variant="destructive"
             className="has-[>svg]:px-1"
             onClick={() => {
-              clearPinnedGitRevisions();
+              clearPinnedNodes();
             }}
           >
             <X />
           </Button>
           <Button
-            disabled={pinnedGitRevisions[1] === null}
+            disabled={pinnedNodes[1] === null}
             variant="secondary"
             onClick={() => {
               setIsGitDialogOpen(true);

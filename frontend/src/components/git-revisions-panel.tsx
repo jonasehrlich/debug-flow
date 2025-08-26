@@ -22,13 +22,13 @@ import { CopyButton } from "./action-button";
 import { GitStatusCard } from "./git-status-card";
 
 const selector = (state: AppState) => ({
-  pinnedGitRevisions: state.pinnedGitRevisions,
-  clearGitRevisions: state.clearPinnedGitRevisions,
+  pinnedNodes: state.pinnedNodes,
+  clearPinnedNodes: state.clearPinnedNodes,
   gitStatus: state.gitStatus,
   prevGitStatus: state.prevGitStatus,
   restoreGitStatus: state.restoreGitStatus,
-  hasRevisions: state.pinnedGitRevisions[0] !== null,
-  displayPanel: state.pinnedGitRevisions[0] !== null || state.gitStatus != null,
+  hasRevisions: state.pinnedNodes[0] !== null,
+  displayPanel: state.pinnedNodes[0] !== null || state.gitStatus != null,
 });
 
 const uiSelector = (s: UiState) => ({
@@ -37,8 +37,8 @@ const uiSelector = (s: UiState) => ({
 
 export const GitRevisionsPanel = () => {
   const {
-    pinnedGitRevisions,
-    clearGitRevisions,
+    pinnedNodes,
+    clearPinnedNodes,
     gitStatus,
     prevGitStatus,
     restoreGitStatus,
@@ -90,14 +90,14 @@ export const GitRevisionsPanel = () => {
                 <CardTitle>Git Revisions</CardTitle>
               </CardHeader>
               <CardContent className="divide-y text-sm">
-                {pinnedGitRevisions.map(
-                  (rev, index) =>
-                    rev && (
+                {pinnedNodes.map(
+                  (node, index) =>
+                    node && (
                       <div key={index} className="flex justify-between py-2">
                         <span className="block max-w-full overflow-hidden font-mono text-ellipsis whitespace-nowrap">
-                          {formatGitRevision(rev)}
+                          {formatGitRevision(node.git)}
                         </span>
-                        <CopyButton value={rev.rev} tooltip={false} />
+                        <CopyButton value={node.git.rev} tooltip={false} />
                       </div>
                     ),
                 )}
@@ -105,13 +105,13 @@ export const GitRevisionsPanel = () => {
               <CardFooter className="flex gap-2">
                 <Button
                   onClick={() => {
-                    clearGitRevisions();
+                    clearPinnedNodes();
                   }}
                   variant="destructive"
                 >
                   <X /> Clear
                 </Button>
-                {pinnedGitRevisions[1] !== null && (
+                {pinnedNodes[1] !== null && (
                   <Button
                     onClick={() => {
                       setIsGitDialogOpen(true);
