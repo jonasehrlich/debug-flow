@@ -1,4 +1,4 @@
-import type { GitMetadata, GitStatus } from "@/client";
+import type { GitStatus } from "@/client";
 import {
   type Edge,
   type OnConnect,
@@ -8,7 +8,12 @@ import {
 } from "@xyflow/react";
 import { type FlowMetadata } from "./api-types";
 import type { EdgeType } from "./edge";
-import type { AppNode, EditAppNodeData, PendingAppNodeData } from "./nodes";
+import type {
+  AppNode,
+  EditAppNodeData,
+  PendingAppNodeData,
+  PinnedNodeData,
+} from "./nodes";
 
 export interface FlowIdAndName {
   id: string;
@@ -54,16 +59,16 @@ export interface AppState {
     | { type: "pending"; data: PendingAppNodeData }
     | { type: "edit"; data: EditAppNodeData }
     | null;
-  /** Array of revisions pinned for a diff. The array can only con */
-  pinnedGitRevisions: [GitMetadata | null, GitMetadata | null];
+  /** Array of pinned nodes for a diff. The array can only contain two elements */
+  pinnedNodes: [PinnedNodeData | null, PinnedNodeData | null];
   /**
-   * Add a Git revision to the {@link pinnedGitRevisions}
+   * Add a Git revision to the {@link pinnedNodes}
    * @description If two revisions are in the array already, the second one is replaced
-   * @param rev - Revision to add
+   * @param node: node to pin
    */
-  addPinnedGitRevision: (rev: GitMetadata) => void;
+  addPinnedNode: (node: PinnedNodeData) => void;
   /** Clear the Git revisions array */
-  clearPinnedGitRevisions: () => void;
+  clearPinnedNodes: () => void;
   /** The current Git status of the repository */
   gitStatus: GitStatus | null;
   /** The Git status of the repository before the checkout*/

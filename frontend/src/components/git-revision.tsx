@@ -15,7 +15,7 @@ import { useShallow } from "zustand/react/shallow";
 import { ActionButton, CopyButton } from "./action-button";
 
 const selector = (s: AppState) => ({
-  addPinnedGitRevision: s.addPinnedGitRevision,
+  addPinnedNode: s.addPinnedNode,
   checkoutGitRevision: s.checkoutGitRevision,
 });
 
@@ -39,15 +39,15 @@ export const GitRevisionIcon = ({
 /**
  * @interface GitRevisionProps
  * @description Props for the GitRevisionProps component.
- * @property {string} revision - The text string to be copied to the clipboard.
+ * @property {GitMetadata} revision - The text string to be copied to the clipboard.
+ * @property {string} nodeId - The ID of the associated node
  */
 interface GitRevisionProps {
   revision: GitMetadata;
+  nodeId: string;
 }
-export const GitRevision = ({ revision }: GitRevisionProps) => {
-  const { addPinnedGitRevision, checkoutGitRevision } = useStore(
-    useShallow(selector),
-  );
+export const GitRevision = ({ revision, nodeId }: GitRevisionProps) => {
+  const { addPinnedNode, checkoutGitRevision } = useStore(useShallow(selector));
 
   const formattedRev = React.useMemo(() => {
     return formatGitRevision(revision);
@@ -63,7 +63,7 @@ export const GitRevision = ({ revision }: GitRevisionProps) => {
         tooltipContent="Pin revision"
         icon={<Pin />}
         onClick={() => {
-          addPinnedGitRevision(revision);
+          addPinnedNode({ id: nodeId, git: revision });
           return true;
         }}
         className="size-6"

@@ -75,6 +75,11 @@ export type EditAppNodeData =
   | EditNodeData<"actionNode", ActionNodeData>
   | EditNodeData<"statusNode", StatusNodeData>;
 
+export interface PinnedNodeData {
+  id: string;
+  git: GitMetadata;
+}
+
 export function isStatusNode(node: Node): node is StatusNode {
   return node.type == "statusNode";
 }

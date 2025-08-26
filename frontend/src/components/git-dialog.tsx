@@ -111,8 +111,8 @@ interface GitGraphData {
 }
 
 const selector = (s: AppState) => ({
-  gitRevisions: s.pinnedGitRevisions,
-  clearGitRevisions: s.clearPinnedGitRevisions,
+  pinnedNodes: s.pinnedNodes,
+  clearGitRevisions: s.clearPinnedNodes,
 });
 
 const uiSelector = (s: UiState) => ({
@@ -121,7 +121,7 @@ const uiSelector = (s: UiState) => ({
 });
 
 export const GitDialog = () => {
-  const { gitRevisions } = useStore(useShallow(selector));
+  const { pinnedNodes } = useStore(useShallow(selector));
   const { isOpen, setIsOpen } = useUiStore(useShallow(uiSelector));
 
   const [gitData, setGitData] = React.useState<GitGraphData>();
@@ -129,12 +129,15 @@ export const GitDialog = () => {
     React.useState<CommitWithReferences | null>(null);
 
   React.useEffect(() => {
-    if (!isOpen || gitRevisions[0] === null || gitRevisions[1] === null) {
+    if (!isOpen || pinnedNodes[0] === null || pinnedNodes[1] === null) {
       return;
     }
+
+    const baseRev = pinnedNodes[0].git.rev;
+    const headRev = pinnedNodes[1].git.rev;
     const commitRange = {
-      baseRev: gitRevisions[0].rev,
-      headRev: gitRevisions[1].rev,
+      baseRev,
+      headRev,
     };
     Promise.all([fetchCommits(commitRange), fetchDiffs(commitRange)])
       .then(([commits, diff]) => {
@@ -146,7 +149,7 @@ export const GitDialog = () => {
       .catch((error: unknown) => {
         notify.error(error);
       });
-  }, [isOpen, gitRevisions]);
+  }, [isOpen, pinnedNodes]);
 
   React.useEffect(() => {
     if (!isOpen) {
@@ -154,9 +157,11 @@ export const GitDialog = () => {
     }
   }, [isOpen, setSelectedCommit]);
 
-  if (gitRevisions[0] === null || gitRevisions[1] === null) {
+  if (pinnedNodes[0] === null || pinnedNodes[1] === null) {
     return null;
   }
+  const baseRev = pinnedNodes[0].git.rev;
+  const headRev = pinnedNodes[1].git.rev;
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogContent
@@ -167,8 +172,8 @@ export const GitDialog = () => {
           <DialogTitle>Git Graph and Diff</DialogTitle>
           <div className="flex flex-wrap gap-2 select-none">
             <Badge variant="secondary" className="font-mono">
-              <GitGraph /> {formatGitRevision(gitRevisions[0])}..
-              {formatGitRevision(gitRevisions[1])}
+              <GitGraph /> {formatGitRevision(baseRev)}..
+              {formatGitRevision(headRev)}
             </Badge>
           </div>
         </DialogHeader>

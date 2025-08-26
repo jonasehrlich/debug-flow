@@ -102,7 +102,7 @@ const initialState = {
   flows: [],
   hasUnsavedChanges: false,
   dialogNodeData: null,
-  pinnedGitRevisions: [null, null] as [null, null],
+  pinnedNodes: [null, null] as [null, null],
   gitStatus: null,
   prevGitStatus: null,
 };
@@ -153,17 +153,17 @@ export const useStore = create<AppState>()(
         }
         set({ dialogNodeData: { type: "pending", data: nodeData } });
       },
-      addPinnedGitRevision(rev) {
-        const revs = get().pinnedGitRevisions;
-        if (revs[0] === null) {
-          revs[0] = rev;
+      addPinnedNode(node) {
+        const pinnedNodes = get().pinnedNodes;
+        if (pinnedNodes[0] === null) {
+          pinnedNodes[0] = node;
         } else {
-          revs[1] = rev;
+          pinnedNodes[1] = node;
         }
-        set({ pinnedGitRevisions: revs });
+        set({ pinnedNodes: pinnedNodes });
       },
-      clearPinnedGitRevisions() {
-        set({ pinnedGitRevisions: [null, null] });
+      clearPinnedNodes() {
+        set({ pinnedNodes: [null, null] });
       },
       async checkoutGitRevision(rev: string) {
         try {

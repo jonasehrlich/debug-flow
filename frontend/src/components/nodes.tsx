@@ -111,10 +111,13 @@ export const ActionNode = React.memo(
             </NodeHeaderActions>
           </NodeHeader>
           <NodeMarkdownSection children={data.description} />
-          <NodeSection
-            children={data.git ? <GitRevision revision={data.git} /> : null}
-          />
         </NodeContent>
+        {data.description && <div className="py-2">{data.description}</div>}
+        <NodeSection
+          children={
+            data.git ? <GitRevision revision={data.git} nodeId={id} /> : null
+          }
+        />
         <BaseHandle
           id={handleIds.target}
           type="target"
@@ -178,7 +181,9 @@ export const StatusNode = React.memo(
           </NodeHeader>
           <NodeMarkdownSection children={data.description} />
           <NodeSection
-            children={data.git ? <GitRevision revision={data.git} /> : null}
+            children={
+              data.git ? <GitRevision revision={data.git} nodeId={id} /> : null
+            }
           />
         </NodeContent>
         {!data.isRootNode && (
