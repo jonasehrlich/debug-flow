@@ -160,8 +160,8 @@ export const GitDialog = () => {
   if (pinnedNodes[0] === null || pinnedNodes[1] === null) {
     return null;
   }
-  const baseRev = pinnedNodes[0].git.rev;
-  const headRev = pinnedNodes[1].git.rev;
+  const baseRev = pinnedNodes[0].git;
+  const headRev = pinnedNodes[1].git;
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogContent
