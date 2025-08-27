@@ -52,10 +52,6 @@ impl AppState {
         })
     }
 
-    pub fn repo_root_path(&self) -> &std::path::Path {
-        self.flows_dir.path().parent().unwrap()
-    }
-
     pub fn flows_dir(&self) -> &flow::FlowsDir {
         &self.flows_dir
     }
@@ -109,7 +105,7 @@ where
 {
     let app_state = AppState::try_new(flows_dir)?;
 
-    let repo_root = app_state.repo_root_path().to_path_buf();
+    let repo_root = app_state.flows_dir().git_repo().to_path_buf();
 
     let rapidoc_path = "/api-docs";
     let app = routing::Router::new()
@@ -149,7 +145,18 @@ where
                     // We get multiple events but don't care at all, we only need to get one Git status
                     let actor = app_state.git_actor();
                     let msg = actors::git::GetRepositoryStatus;
-                    let status = actor.call(msg).await.unwrap().unwrap();
+                    let status = match actor.call(msg).await {
+                        Err(e) => {
+                            log::error!("Error calling Git actor from Git status task {e}");
+                            continue;
+                        }
+                        Ok(Err(e)) => {
+                            log::error!("Getting Git status: {e}");
+                            continue;
+                        }
+                        Ok(Ok(s)) => s,
+                    };
+
                     log::debug!(
                         "Received FS event: worktree {:?}, index: {:?}",
                         status.worktree(),
