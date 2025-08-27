@@ -4,6 +4,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { useEventStream } from "@/hooks/use-event-stream";
+import { notify } from "@/lib/notify";
 import { cn } from "@/lib/utils";
 import { useStore, useUiStore } from "@/store";
 import type { RepositoryStatus } from "@/types/api-types";
@@ -269,7 +270,9 @@ const RestoreGitStatusButton = () => {
             size="sm"
             className="h-6 px-2 text-xs"
             onClick={() => {
-              restoreGitStatus();
+              restoreGitStatus().catch((err: unknown) => {
+                notify.error(err);
+              });
             }}
           >
             <RotateCcw size={12} className="mr-1" />
