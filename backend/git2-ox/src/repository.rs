@@ -224,7 +224,7 @@ impl Repository {
 
     /// Get the status of the repository
     pub fn status(&self) -> Result<Status> {
-        self.try_into()
+        Status::try_from_repository(self)
     }
 
     /// Add all paths matching the pathspecs to the index

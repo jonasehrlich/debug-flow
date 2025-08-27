@@ -90,12 +90,8 @@ impl Status {
     pub fn conflicted(&self) -> &Files {
         &self.conflicts
     }
-}
 
-impl TryFrom<&Repository> for Status {
-    type Error = Error;
-
-    fn try_from(repo: &Repository) -> Result<Self> {
+    pub fn try_from_repository(repo: &Repository) -> Result<Self> {
         let head = repo.get_commit_for_revision("HEAD")?;
 
         let mut opts = git2::StatusOptions::new();
@@ -114,42 +110,31 @@ impl TryFrom<&Repository> for Status {
         let mut worktree_status = TreeStatus::default();
         let mut conflicts = Vec::new();
 
+        let entry_path_string =
+            |entry: git2::StatusEntry| entry.path().unwrap_or("<invalid utf-8>").to_string();
+
         for entry in statuses.iter() {
             let status = entry.status();
             if status.is_index_new() {
-                index_status
-                    .new_files
-                    .push(entry.path().unwrap_or("<invalid utf-8>").to_string());
+                index_status.new_files.push(entry_path_string(entry));
             } else if status.is_index_renamed() {
-                index_status
-                    .renamed_files
-                    .push(entry.path().unwrap_or("<invalid utf-8>").to_string());
+                index_status.renamed_files.push(entry_path_string(entry));
             } else if status.is_index_modified() {
-                index_status
-                    .modified_files
-                    .push(entry.path().unwrap_or("<invalid utf-8>").to_string());
+                index_status.modified_files.push(entry_path_string(entry));
             } else if status.is_index_deleted() {
-                index_status
-                    .deleted_files
-                    .push(entry.path().unwrap_or("<invalid utf-8>").to_string());
+                index_status.deleted_files.push(entry_path_string(entry));
             } else if status.is_wt_new() {
-                worktree_status
-                    .new_files
-                    .push(entry.path().unwrap_or("<invalid utf-8>").to_string());
+                worktree_status.new_files.push(entry_path_string(entry));
             } else if status.is_wt_renamed() {
-                worktree_status
-                    .renamed_files
-                    .push(entry.path().unwrap_or("<invalid utf-8>").to_string());
+                worktree_status.renamed_files.push(entry_path_string(entry));
             } else if status.is_wt_modified() {
                 worktree_status
                     .modified_files
-                    .push(entry.path().unwrap_or("<invalid utf-8>").to_string());
+                    .push(entry_path_string(entry));
             } else if status.is_wt_deleted() {
-                worktree_status
-                    .deleted_files
-                    .push(entry.path().unwrap_or("<invalid utf-8>").to_string());
+                worktree_status.deleted_files.push(entry_path_string(entry));
             } else if status.is_conflicted() {
-                conflicts.push(entry.path().unwrap_or("<invalid utf-8>").to_string());
+                conflicts.push(entry_path_string(entry));
             }
         }
 
@@ -164,12 +149,5 @@ impl TryFrom<&Repository> for Status {
             worktree: worktree_status,
             conflicts,
         })
-    }
-}
-
-impl TryFrom<Repository> for Status {
-    type Error = Error;
-    fn try_from(repo: Repository) -> Result<Self> {
-        Status::try_from(&repo)
     }
 }
