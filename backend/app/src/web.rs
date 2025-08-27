@@ -1,4 +1,4 @@
-use crate::{actors, flow};
+use crate::{actors, flow, fswatcher};
 use axum::routing;
 #[cfg(not(debug_assertions))]
 use axum::{http, response::IntoResponse};
@@ -7,6 +7,7 @@ use axum_reverse_proxy::ReverseProxy;
 use hannibal::prelude::*;
 #[cfg(not(debug_assertions))]
 use mime_guess::from_path;
+use tokio::sync::broadcast;
 use utoipa::OpenApi;
 
 #[cfg(not(debug_assertions))]
@@ -34,6 +35,7 @@ pub struct ApiDoc;
 struct AppState {
     flows_dir: flow::FlowsDir,
     git_actor: actors::git::GitActorAddr,
+    git_status_tx: broadcast::Sender<git2_ox::Status>,
 }
 
 impl AppState {
@@ -41,9 +43,12 @@ impl AppState {
         let repo = flows_dir.git_repo();
         let git_actor = crate::actors::git::GitActor::try_from_path(repo)?.spawn();
 
+        let (tx, _rx) = broadcast::channel(16);
+
         Ok(Self {
             flows_dir,
             git_actor,
+            git_status_tx: tx,
         })
     }
 
@@ -53,6 +58,11 @@ impl AppState {
 
     pub fn git_actor(&self) -> &actors::git::GitActorAddr {
         &self.git_actor
+    }
+
+    /// Sender for the broadcast channel sending Git status updates
+    pub fn git_status_tx(&self) -> &broadcast::Sender<git2_ox::Status> {
+        &self.git_status_tx
     }
 }
 
@@ -95,10 +105,12 @@ where
 {
     let app_state = AppState::try_new(flows_dir)?;
 
+    let repo_root = app_state.flows_dir().git_repo().to_path_buf();
+
     let rapidoc_path = "/api-docs";
     let app = routing::Router::new()
         .nest("/api", api::router())
-        .with_state(app_state)
+        .with_state(app_state.clone())
         .merge(
             utoipa_rapidoc::RapiDoc::with_openapi("/api-docs/openapi.json", ApiDoc::openapi())
                 .path(rapidoc_path),
@@ -118,6 +130,63 @@ where
         rapidoc_path
     );
     on_bind();
+
+    let paths = [repo_root.as_path()];
+
+    // TODO: Do we need to move the debouncer to another thread?
+    let (_debouncer, fs_rx) = fswatcher::setup_watchers(&paths, std::time::Duration::from_secs(1));
+
+    tokio::spawn(async move {
+        let mut previous_status: Option<git2_ox::Status> = None;
+        loop {
+            let res = fs_rx.recv();
+            match res {
+                Ok(_) => {
+                    // We get multiple events but don't care at all, we only need to get one Git status
+                    let actor = app_state.git_actor();
+                    let msg = actors::git::GetRepositoryStatus;
+                    let status = match actor.call(msg).await {
+                        Err(e) => {
+                            log::error!("Error calling Git actor from Git status task {e}");
+                            continue;
+                        }
+                        Ok(Err(e)) => {
+                            log::error!("Getting Git status: {e}");
+                            continue;
+                        }
+                        Ok(Ok(s)) => s,
+                    };
+
+                    log::debug!(
+                        "Received FS event: worktree {:?}, index: {:?}",
+                        status.worktree(),
+                        status.index()
+                    );
+
+                    let status_changed = match previous_status {
+                        None => true,
+                        Some(ref s) => *s != status,
+                    };
+
+                    if status_changed {
+                        previous_status = Some(status.clone());
+                        let tx = app_state.git_status_tx();
+                        let num_rx = tx.receiver_count();
+                        match tx.send(status) {
+                            Ok(_) => log::debug!("Sent git status to channel ({num_rx})"),
+                            Err(e) => {
+                                log::error!("Error sending status to channel ({num_rx}): {e}")
+                            }
+                        }
+                    }
+                }
+                Err(errs) => {
+                    log::error!("watch error: {errs:?}")
+                }
+            }
+        }
+    });
+
     axum::serve(listener, app)
         // .with_graceful_shutdown(shutdown_signal(deletion_task.abort_handle()))
         .await?;
