@@ -1,4 +1,4 @@
-import type { GitMetadata, GitStatus } from "@/client";
+import type { GitStatus } from "@/client";
 import {
   type Edge,
   type OnConnect,
@@ -8,7 +8,13 @@ import {
 } from "@xyflow/react";
 import { type FlowMetadata } from "./api-types";
 import type { EdgeType } from "./edge";
-import type { AppNode, EditAppNodeData, PendingAppNodeData } from "./nodes";
+import type {
+  AppNode,
+  EditAppNodeData,
+  PendingAppNodeData,
+  PinnedNodeData,
+  PinnedState,
+} from "./nodes";
 
 export interface FlowIdAndName {
   id: string;
@@ -54,16 +60,26 @@ export interface AppState {
     | { type: "pending"; data: PendingAppNodeData }
     | { type: "edit"; data: EditAppNodeData }
     | null;
-  /** Array of revisions pinned for a diff. The array can only con */
-  pinnedGitRevisions: [GitMetadata | null, GitMetadata | null];
+  /** Array of pinned nodes for a diff. The array can only contain two elements */
+  pinnedNodes: [PinnedNodeData | null, PinnedNodeData | null];
+  /** ID of the currently highlighted node */
+  highlightedNodeId: string | null;
+  /** Highlight a pinned node by its ID */
+  highlightPinnedNode: (nodeId: string) => void;
+  /** Clear the currently highlighted node */
+  clearHighlightedNode: () => void;
   /**
-   * Add a Git revision to the {@link pinnedGitRevisions}
+   * Add a Git revision to the {@link pinnedNodes}
    * @description If two revisions are in the array already, the second one is replaced
-   * @param rev - Revision to add
+   * @param node: node to pin
+   * @returns The pinned state (PinnedA or PinnedB)
    */
-  addPinnedGitRevision: (rev: GitMetadata) => void;
-  /** Clear the Git revisions array */
-  clearPinnedGitRevisions: () => void;
+  addPinnedNode: (node: PinnedNodeData) => PinnedState;
+  /**
+   * Clear the Git revisions array
+   * @param state - Optional pinned state to clear (PinnedA or PinnedB). If not provided, clears all pinned nodes
+   */
+  clearPinnedNodes: (state?: PinnedState) => void;
   /** The current Git status of the repository */
   gitStatus: GitStatus | null;
   /** The Git status of the repository before the checkout*/

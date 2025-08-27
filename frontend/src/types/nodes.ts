@@ -75,6 +75,19 @@ export type EditAppNodeData =
   | EditNodeData<"actionNode", ActionNodeData>
   | EditNodeData<"statusNode", StatusNodeData>;
 
+export const PinnedState = {
+  PinnedA: "a",
+  PinnedB: "b",
+  NotPinned: "",
+} as const;
+
+export type PinnedState = (typeof PinnedState)[keyof typeof PinnedState];
+
+export interface PinnedNodeData {
+  id: string;
+  git: GitMetadata;
+}
+
 export function isStatusNode(node: Node): node is StatusNode {
   return node.type == "statusNode";
 }

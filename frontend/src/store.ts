@@ -23,6 +23,7 @@ import {
   getMatchingMetaData,
   isAppNode,
   isStatusNode,
+  PinnedState,
   type AppNode,
   type AppNodeType,
 } from "./types/nodes";
@@ -102,7 +103,8 @@ const initialState = {
   flows: [],
   hasUnsavedChanges: false,
   dialogNodeData: null,
-  pinnedGitRevisions: [null, null] as [null, null],
+  pinnedNodes: [null, null] as [null, null],
+  highlightedNodeId: null as string | null,
   gitStatus: null,
   prevGitStatus: null,
 };
@@ -153,17 +155,38 @@ export const useStore = create<AppState>()(
         }
         set({ dialogNodeData: { type: "pending", data: nodeData } });
       },
-      addPinnedGitRevision(rev) {
-        const revs = get().pinnedGitRevisions;
-        if (revs[0] === null) {
-          revs[0] = rev;
-        } else {
-          revs[1] = rev;
+      addPinnedNode(node) {
+        // We mustn't mutate the exisiting array so that zustand useShallow detects the change
+        const pinnedNodes = get().pinnedNodes;
+        const cyclePinnedNodes = pinnedNodes.every((n) => n !== null);
+        if (cyclePinnedNodes) {
+          set({ pinnedNodes: [pinnedNodes[1], node] });
+          return PinnedState.PinnedB;
         }
-        set({ pinnedGitRevisions: revs });
+
+        if (pinnedNodes[0] === null) {
+          set({ pinnedNodes: [node, pinnedNodes[1]] });
+          return PinnedState.PinnedA;
+        } else {
+          set({ pinnedNodes: [pinnedNodes[0], node] });
+          return PinnedState.PinnedB;
+        }
       },
-      clearPinnedGitRevisions() {
-        set({ pinnedGitRevisions: [null, null] });
+      clearPinnedNodes(state?: PinnedState) {
+        const pinnedNodes = get().pinnedNodes;
+        if (state === PinnedState.PinnedA) {
+          set({ pinnedNodes: [null, pinnedNodes[1]] });
+        } else if (state === PinnedState.PinnedB) {
+          set({ pinnedNodes: [pinnedNodes[0], null] });
+        } else {
+          set({ pinnedNodes: [null, null] });
+        }
+      },
+      highlightPinnedNode(nodeId: string) {
+        set({ highlightedNodeId: nodeId });
+      },
+      clearHighlightedNode() {
+        set({ highlightedNodeId: null });
       },
       async checkoutGitRevision(rev: string) {
         try {
