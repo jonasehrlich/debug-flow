@@ -21,7 +21,9 @@ import {
   FilePlus,
   GitBranch,
   GitCommitVertical,
+  GitGraph,
   RotateCcw,
+  Trash,
   type LucideIcon,
 } from "lucide-react";
 import React from "react";
@@ -245,7 +247,7 @@ const PinnedGitRev = ({
       <div className="bg-primary text-primary-foreground flex h-4 w-4 items-center justify-center rounded-full text-xs font-medium select-none">
         {letter}
       </div>
-      <span className="max-w-48 truncate font-mono text-sm select-none">
+      <span className="max-w-48 truncate text-sm select-none">
         {formatGitRevision(node.git)}
       </span>
     </div>
@@ -315,27 +317,38 @@ export const PinnedNodesStatusBarItem = () => {
         highlightPinnedNode={highlightPinnedNode}
         clearHighlightedNode={clearHighlightedNode}
       />
-      <Button
-        variant="destructive"
-        size="sm"
-        className="h-6 px-2 text-xs"
-        onClick={() => {
-          clearPinnedNodes();
-        }}
-      >
-        Clear
-      </Button>
-      <Button
-        disabled={pinnedNodes[1] === null}
-        variant="secondary"
-        size="sm"
-        className="h-6 px-2 text-xs"
-        onClick={() => {
-          setIsGitDialogOpen(true);
-        }}
-      >
-        Git Graph
-      </Button>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            variant="destructive"
+            size="sm"
+            className="h-6 px-2 text-xs"
+            onClick={() => {
+              clearPinnedNodes();
+            }}
+          >
+            <Trash />
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>Clear pinned revisions</TooltipContent>
+      </Tooltip>
+
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            disabled={pinnedNodes[1] === null}
+            variant="secondary"
+            size="sm"
+            className="h-6 px-2 text-xs"
+            onClick={() => {
+              setIsGitDialogOpen(true);
+            }}
+          >
+            <GitGraph />
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>Diff pinned revisions</TooltipContent>
+      </Tooltip>
     </StatusBarItem>
   );
 };
