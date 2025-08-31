@@ -76,8 +76,8 @@ export type EditAppNodeData =
   | EditNodeData<"statusNode", StatusNodeData>;
 
 export const PinnedState = {
-  PinnedA: "a",
-  PinnedB: "b",
+  PinnedA: "A",
+  PinnedB: "B",
   NotPinned: "",
 } as const;
 
