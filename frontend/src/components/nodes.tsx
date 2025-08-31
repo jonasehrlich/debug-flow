@@ -88,6 +88,7 @@ const selector = (s: AppState) => ({
 });
 
 const commonNodeClasses = "w-xs" as const;
+const highlightClasses = "z-10 scale-110 ring-2 ring-blue-500";
 
 export const ActionNode = React.memo(
   ({ id, data, selected }: NodeProps<ActionNodeType>) => {
@@ -101,10 +102,7 @@ export const ActionNode = React.memo(
     return (
       <BaseNode
         selected={selected}
-        className={cn(
-          commonNodeClasses,
-          isHighlighted && "z-10 scale-110 ring-2 ring-blue-500",
-        )}
+        className={cn(commonNodeClasses, isHighlighted && highlightClasses)}
       >
         <NodeContent className="divide-y">
           <NodeHeader>
@@ -166,7 +164,7 @@ export const StatusNode = React.memo(
           commonNodeClasses,
           statusNodeStateClasses[data.state].bg,
           statusNodeStateClasses[data.state].border,
-          isHighlighted && "z-10 scale-110 ring-2 ring-blue-500",
+          isHighlighted && highlightClasses,
         )}
       >
         <NodeContent
