@@ -84,18 +84,26 @@ const AppNodeHeaderMenuAction = ({
 
 const selector = (s: AppState) => ({
   setEditNodeData: s.setCurrentEditNodeData,
+  highlightedNodeId: s.highlightedNodeId,
 });
 
 const commonNodeClasses = "w-xs" as const;
+const highlightClasses = "z-10 scale-110 ring-2 ring-blue-500";
 
 export const ActionNode = React.memo(
   ({ id, data, selected }: NodeProps<ActionNodeType>) => {
+    const { highlightedNodeId } = useStore(useShallow(selector));
     const [handleIds] = React.useState(() => {
       return { target: `target-${id}`, source: `source-${id}` };
     });
 
+    const isHighlighted = highlightedNodeId === id;
+
     return (
-      <BaseNode selected={selected} className={commonNodeClasses}>
+      <BaseNode
+        selected={selected}
+        className={cn(commonNodeClasses, isHighlighted && highlightClasses)}
+      >
         <NodeContent className="divide-y">
           <NodeHeader>
             <NodeHeaderIcon>
@@ -111,10 +119,12 @@ export const ActionNode = React.memo(
             </NodeHeaderActions>
           </NodeHeader>
           <NodeMarkdownSection children={data.description} />
-          <NodeSection
-            children={data.git ? <GitRevision revision={data.git} /> : null}
-          />
         </NodeContent>
+        <NodeSection
+          children={
+            data.git ? <GitRevision revision={data.git} nodeId={id} /> : null
+          }
+        />
         <BaseHandle
           id={handleIds.target}
           type="target"
@@ -134,6 +144,7 @@ ActionNode.displayName = "ActionNode";
 
 export const StatusNode = React.memo(
   ({ id, data, selected }: NodeProps<StatusNodeType>) => {
+    const { highlightedNodeId } = useStore(useShallow(selector));
     const { updateNodeData } = useReactFlow();
 
     const handleIds = React.useMemo(() => {
@@ -142,6 +153,9 @@ export const StatusNode = React.memo(
         source: `source-${id}`,
       };
     }, [id]);
+
+    const isHighlighted = highlightedNodeId === id;
+
     return (
       <BaseNode
         selected={selected}
@@ -149,6 +163,7 @@ export const StatusNode = React.memo(
           commonNodeClasses,
           statusNodeStateClasses[data.state].bg,
           statusNodeStateClasses[data.state].border,
+          isHighlighted && highlightClasses,
         )}
       >
         <NodeContent
@@ -178,7 +193,9 @@ export const StatusNode = React.memo(
           </NodeHeader>
           <NodeMarkdownSection children={data.description} />
           <NodeSection
-            children={data.git ? <GitRevision revision={data.git} /> : null}
+            children={
+              data.git ? <GitRevision revision={data.git} nodeId={id} /> : null
+            }
           />
         </NodeContent>
         {!data.isRootNode && (
