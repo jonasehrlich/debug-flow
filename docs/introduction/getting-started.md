@@ -14,8 +14,8 @@ Run `debug-flow` using:
 debug-flow <git-repo>
 ```
 
-where `<git-repo> is the Git Repository that should be managed (default: `.`)
-This will create a `./debug-flow`directory and start a webserver on`localhost` that provides access
+where `<git-repo>` is the Git Repository that should be managed (default: `.`)
+This will create a `./debug-flow` directory and start a webserver on `localhost` that provides access
 to your projects and the repository.
 
 The host and port that the server binds to is printed in the terminal and can then be opened in the
