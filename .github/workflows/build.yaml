@@ -21,7 +21,7 @@ jobs:
       - name: Build documentation
         run: npm run docs:build
       - name: Upload docs artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: docs
           path: docs/.vitepress/dist
@@ -67,7 +67,7 @@ jobs:
         run: |
           cp target/${{ matrix.target }}/release/${{ matrix.binary_name }} ${{ matrix.release_name }}
       - name: Upload binary artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: ${{ matrix.target }}-binary
           path: ${{ matrix.release_name }}
